@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">adapter</string>
+    <string name="not_net_error">网络不给力，轻触屏幕重新加载吧~</string>
+    <string name="not_data">没有更多数据哦>></string>
+</resources>
