@@ -38,6 +38,8 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
     private int mNotDataContentRes = R.string.not_data;
     private View mHeadView;
     private View mFootView;
+    protected boolean isHaveHeadView;
+    protected boolean isHaveFootView;
 
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
@@ -64,10 +66,26 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
 
     public void addHeadView(@NonNull View headView) {
         this.mHeadView = headView;
+        isHaveHeadView = true;
     }
 
     public void addFootView(@NonNull View footView) {
         this.mFootView = footView;
+        isHaveFootView = true;
+    }
+
+    public void removeHeadView() {
+        if (isHaveHeadView) {
+            mHeadView = null;
+            isHaveHeadView = false;
+        }
+    }
+
+    public void removeFootView() {
+        if (isHaveHeadView) {
+            mFootView = null;
+            isHaveFootView = false;
+        }
     }
 
     public BaseRecyclerAdapter(@NonNull D data) {
@@ -83,20 +101,23 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
 
     @Override
     public int getItemViewType(int position) {
-        Log.w("getItemViewType--", position + "--");
         if (mData == null || mData.size() == 0) {
-            if (mIsHasNet) {
+            if (isHaveHeadView && position == 0) {
+                return TYPE_HEAD_VIEW;
+            } else if (isHaveFootView) {
+                return TYPE_FOOT_VIEW;
+            } else if (mIsHasNet) {
                 return TYPE_NOT_DATA;
             } else {
                 return TYPE_NOT_NET;
             }
+
         } else {
-            if (mHeadView != null && position == 0) {
+            if (isHaveHeadView && position == 0) {
                 return TYPE_HEAD_VIEW;
-            }
-            if (mFootView != null) {
-                if (mHeadView != null) {
-                    if (position == mData.size()+1) {
+            } else if (isHaveFootView) {
+                if (isHaveHeadView) {
+                    if (position == mData.size() + 1) {
                         return TYPE_FOOT_VIEW;
                     }
                 } else {
@@ -105,9 +126,8 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
                     }
                 }
             }
-            return super.getItemViewType(position);
         }
-
+        return super.getItemViewType(position);
     }
 
 
@@ -134,7 +154,6 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
                 viewHolder = onCreateDataViewHolder(viewGroup, i);
                 break;
         }
-        Log.w("onCreateViewHolder--", i + "--");
         return (VH) viewHolder;
     }
 
@@ -165,10 +184,10 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
                     }
                 }
             });
-        } else if (getItemViewType(i) == 0) {
-                if (mHeadView != null){
-                    i--;
-                }
+        }/* else if (getItemViewType(i) == 0) {*/ else {
+            if (isHaveHeadView) {
+                i--;
+            }
             onBindViewDataHolder(viewHolder, i);
         }
     }
@@ -180,13 +199,13 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
     @Override
     public int getItemCount() {
         int i = 0;
-        if (mHeadView != null) {
+        if (isHaveHeadView) {
             i++;
         }
-        if (mFootView != null) {
+        if (isHaveFootView) {
             i++;
         }
-        return mData == null || mData.size() == 0 ? 1 : mData.size() + i;
+        return mData == null || mData.size() == 0 ? /*(i == 0 ? 1 : i) */i + 1 : mData.size() + i;
     }
 
     static class NotDataViewHolder extends RecyclerView.ViewHolder {
