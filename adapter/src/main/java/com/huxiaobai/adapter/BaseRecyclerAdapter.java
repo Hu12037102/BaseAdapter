@@ -93,6 +93,12 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
         this.mNotMoreView = view;
     }
 
+    public void removeNotMoreView() {
+        if (isHaveNotMoreView) {
+            isHaveNotMoreView = false;
+        }
+    }
+
     public BaseRecyclerAdapter(@NonNull D data) {
         this.mData = data;
     }

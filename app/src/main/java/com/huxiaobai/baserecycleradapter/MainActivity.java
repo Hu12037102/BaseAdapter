@@ -73,8 +73,10 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_clear).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                  mData.clear();
-               // mDataAdapter.removeFootView();
+               //   mData.clear();
+                mDataAdapter.removeHeadView();
+                mDataAdapter.removeFootView();
+                mDataAdapter.removeNotMoreView();
                 mDataAdapter.notifyData(NetUtils.hasNetInfo(MainActivity.this));
             }
         });

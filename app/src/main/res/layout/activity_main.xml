@@ -23,7 +23,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintBottom_toTopOf="@id/btn_clear"
-
+        app:srlEnableLoadMore="false"
         >
 
         <android.support.v7.widget.RecyclerView
