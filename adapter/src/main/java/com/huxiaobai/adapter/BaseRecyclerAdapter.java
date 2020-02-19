@@ -1,6 +1,5 @@
 package com.huxiaobai.adapter;
 
-import android.content.Context;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
@@ -12,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.IllegalFormatCodePointException;
 import java.util.List;
 
 /**
@@ -32,14 +30,18 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
     private static final int TYPE_NOT_DATA = 101;
     private static final int TYPE_HEAD_VIEW = 102;
     private static final int TYPE_FOOT_VIEW = 103;
+    private static final int TYPE_NOT_MORE = 104;
     private int mNotNetViewRes = R.mipmap.ic_error;
     private int mNotDataViewRes = R.mipmap.ic_not_data;
     private int mNotNetContentRes = R.string.not_net_error;
     private int mNotDataContentRes = R.string.not_data;
     private View mHeadView;
     private View mFootView;
+    private View mNotMoreView;
     protected boolean isHaveHeadView;
     protected boolean isHaveFootView;
+    private boolean isHaveNotMoreView;
+    private int mAllDataCount;
 
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
@@ -76,16 +78,19 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
 
     public void removeHeadView() {
         if (isHaveHeadView) {
-            mHeadView = null;
             isHaveHeadView = false;
         }
     }
 
     public void removeFootView() {
-        if (isHaveHeadView) {
-            mFootView = null;
+        if (isHaveFootView) {
             isHaveFootView = false;
         }
+    }
+
+    public void addNotMoreView(@NonNull View view) {
+        this.isHaveNotMoreView = true;
+        this.mNotMoreView = view;
     }
 
     public BaseRecyclerAdapter(@NonNull D data) {
@@ -101,31 +106,39 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
 
     @Override
     public int getItemViewType(int position) {
-        if (mData == null || mData.size() == 0) {
+        if (mData != null && mData.size() > 0) {
             if (isHaveHeadView && position == 0) {
                 return TYPE_HEAD_VIEW;
+            } else if (isHaveNotMoreView && position == mAllDataCount - 1) {
+                return TYPE_NOT_MORE;
             } else if (isHaveFootView) {
-                return TYPE_FOOT_VIEW;
+                if (isHaveNotMoreView && position == mAllDataCount - 2) {
+                    return TYPE_FOOT_VIEW;
+                } else if (!isHaveNotMoreView && position == mAllDataCount - 1) {
+                    return TYPE_FOOT_VIEW;
+                }
+            }
+        } else {
+            if (isHaveHeadView && position == 0) {
+                return TYPE_HEAD_VIEW;
+            } else if (isHaveNotMoreView && position == mAllDataCount - 1) {
+                return TYPE_NOT_MORE;
+            } else if (isHaveFootView) {
+                if (isHaveNotMoreView && position == mAllDataCount - 2) {
+                    return TYPE_FOOT_VIEW;
+                } else if (!isHaveNotMoreView && position == mAllDataCount - 1) {
+                    return TYPE_FOOT_VIEW;
+                } else if (mIsHasNet) {
+                    return TYPE_NOT_DATA;
+                } else {
+                    return TYPE_NOT_NET;
+                }
             } else if (mIsHasNet) {
                 return TYPE_NOT_DATA;
             } else {
                 return TYPE_NOT_NET;
             }
 
-        } else {
-            if (isHaveHeadView && position == 0) {
-                return TYPE_HEAD_VIEW;
-            } else if (isHaveFootView) {
-                if (isHaveHeadView) {
-                    if (position == mData.size() + 1) {
-                        return TYPE_FOOT_VIEW;
-                    }
-                } else {
-                    if (position == mData.size()) {
-                        return TYPE_FOOT_VIEW;
-                    }
-                }
-            }
         }
         return super.getItemViewType(position);
     }
@@ -148,6 +161,10 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
                 break;
             case TYPE_FOOT_VIEW:
                 viewHolder = new RecyclerView.ViewHolder(mFootView) {
+                };
+                break;
+            case TYPE_NOT_MORE:
+                viewHolder = new RecyclerView.ViewHolder(mNotMoreView) {
                 };
                 break;
             default:
@@ -205,7 +222,15 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
         if (isHaveFootView) {
             i++;
         }
-        return mData == null || mData.size() == 0 ? /*(i == 0 ? 1 : i) */i + 1 : mData.size() + i;
+        if (isHaveNotMoreView) {
+            i++;
+        }
+        if (mData == null || mData.size() == 0) {
+            mAllDataCount = i + 1;
+        } else {
+            mAllDataCount = mData.size() + i;
+        }
+        return mAllDataCount;
     }
 
     static class NotDataViewHolder extends RecyclerView.ViewHolder {
@@ -238,6 +263,12 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
         private void initView(View itemView) {
             mIvNotNet = itemView.findViewById(R.id.iv_not_net);
             mTvNotNet = itemView.findViewById(R.id.tv_not_net);
+        }
+    }
+
+    static class NotMoreViewHolder extends RecyclerView.ViewHolder {
+        public NotMoreViewHolder(@NonNull View itemView) {
+            super(itemView);
         }
     }
 

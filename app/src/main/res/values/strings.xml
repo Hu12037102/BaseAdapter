@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">BaseRecyclerAdapter</string>
+    <string name="not_more_data">没有更多数据</string>
 </resources>

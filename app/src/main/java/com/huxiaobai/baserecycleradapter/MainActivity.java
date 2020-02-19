@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.huxiaobai.adapter.BaseRecyclerAdapter;
@@ -59,8 +60,9 @@ public class MainActivity extends AppCompatActivity {
         }
         if (mDataAdapter == null) {
             mDataAdapter = new DataAdapter(mData);
-            mDataAdapter.addHeadView(LayoutInflater.from(this).inflate(R.layout.item_head_view,null));
-            mDataAdapter.addFootView(LayoutInflater.from(this).inflate(R.layout.item_data_view,null));
+            mDataAdapter.addHeadView(LayoutInflater.from(this).inflate(R.layout.item_head_view, null));
+            mDataAdapter.addFootView(LayoutInflater.from(this).inflate(R.layout.item_data_view, null));
+            mDataAdapter.addNotMoreView(LayoutInflater.from(this).inflate(R.layout.item_not_more, mRvData,false));
             mRvData.setAdapter(mDataAdapter);
         } else {
             mDataAdapter.notifyData(NetUtils.hasNetInfo(MainActivity.this));
@@ -71,7 +73,8 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_clear).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mData.clear();
+                  mData.clear();
+               // mDataAdapter.removeFootView();
                 mDataAdapter.notifyData(NetUtils.hasNetInfo(MainActivity.this));
             }
         });
