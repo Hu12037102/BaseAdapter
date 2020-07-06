@@ -1,6 +1,7 @@
 package com.huxiaobai.adapter;
 
 import android.content.Context;
+
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
@@ -41,7 +42,7 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, T>
     protected boolean isHaveHeadView;
     protected boolean isHaveFootView;
     private int mAllDataCount;
-    private Context mContext;
+    protected Context mContext;
 
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
@@ -173,6 +174,12 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, T>
                 i--;
             }
             onBindViewDataHolder(viewHolder, i);
+            int finalI = i;
+            viewHolder.itemView.setOnClickListener(view -> {
+                if (onItemClickListener!=null){
+                    onItemClickListener.onItemClick(view, finalI);
+                }
+            });
         }
     }
 
@@ -241,5 +248,43 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, T>
         void onNotDataClick(View view);
 
         void onItemClick(View view, int position);
+
+        default void onItemLongClick(View view, int position) {
+        }
     }
+
+    public void insertNotifyDataChange(T t, int position) {
+        mData.add(position, t);
+        notifyItemInserted(position);
+    }
+
+    public void insertNotifyDataChanged(T t) {
+        mData.add(t);
+        notifyItemInserted(mData.size() - 1);
+    }
+
+    public void notifyAllDataChanged(T t) {
+        mData.add(t);
+        notifyDataSetChanged();
+    }
+
+    public void notifyAllDataChanged(List<T> data) {
+        mData.addAll(data);
+        notifyDataSetChanged();
+    }
+
+    public void removeNotifyDataChanged(T t) {
+        int i = mData.indexOf(t);
+        if (i < 0) {
+            return;
+        }
+        mData.remove(t);
+        notifyItemRemoved(i);
+    }
+
+    public void removeNotifyDataChanged(int i) {
+        mData.remove(i);
+        notifyItemRemoved(i);
+    }
+
 }
