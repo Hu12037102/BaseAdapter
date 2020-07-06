@@ -1,5 +1,6 @@
 package com.huxiaobai.adapter;
 
+import android.content.Context;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
@@ -23,8 +24,8 @@ import java.util.List;
  *
  * @author ：
  */
-public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D extends List> extends RecyclerView.Adapter<VH> {
-    protected D mData;
+public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, T> extends RecyclerView.Adapter<VH> {
+    protected List<T> mData;
     private boolean mIsHasNet = true;
     private static final int TYPE_NOT_NET = 100;
     private static final int TYPE_NOT_DATA = 101;
@@ -37,11 +38,10 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
     private int mNotDataContentRes = R.string.not_data;
     private View mHeadView;
     private View mFootView;
-    private View mNotMoreView;
     protected boolean isHaveHeadView;
     protected boolean isHaveFootView;
-    private boolean isHaveNotMoreView;
     private int mAllDataCount;
+    private Context mContext;
 
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
@@ -88,18 +88,9 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
         }
     }
 
-    public void addNotMoreView(@NonNull View view) {
-        this.isHaveNotMoreView = true;
-        this.mNotMoreView = view;
-    }
 
-    public void removeNotMoreView() {
-        if (isHaveNotMoreView) {
-            isHaveNotMoreView = false;
-        }
-    }
-
-    public BaseRecyclerAdapter(@NonNull D data) {
+    public BaseRecyclerAdapter(@NonNull Context context, @NonNull List<T> data) {
+        this.mContext = context;
         this.mData = data;
     }
 
@@ -112,41 +103,15 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
 
     @Override
     public int getItemViewType(int position) {
-        if (mData != null && mData.size() > 0) {
-            if (isHaveHeadView && position == 0) {
-                return TYPE_HEAD_VIEW;
-            } else if (isHaveNotMoreView && position == mAllDataCount - 1) {
-                return TYPE_NOT_MORE;
-            } else if (isHaveFootView) {
-                if (isHaveNotMoreView && position == mAllDataCount - 2) {
-                    return TYPE_FOOT_VIEW;
-                } else if (!isHaveNotMoreView && position == mAllDataCount - 1) {
-                    return TYPE_FOOT_VIEW;
-                }
-            }
-        } else {
-            if (isHaveHeadView && position == 0) {
-                return TYPE_HEAD_VIEW;
-            } else if (isHaveNotMoreView && position == mAllDataCount - 1) {
-                return TYPE_NOT_MORE;
-            } else if (isHaveFootView) {
-                if (isHaveNotMoreView && position == mAllDataCount - 2) {
-                    return TYPE_FOOT_VIEW;
-                } else if (!isHaveNotMoreView && position == mAllDataCount - 1) {
-                    return TYPE_FOOT_VIEW;
-                } else if (mIsHasNet) {
-                    return TYPE_NOT_DATA;
-                } else {
-                    return TYPE_NOT_NET;
-                }
-            } else if (mIsHasNet) {
-                return TYPE_NOT_DATA;
-            } else {
-                return TYPE_NOT_NET;
-            }
-
+        if (position == 0 && isHaveHeadView) {
+            return TYPE_HEAD_VIEW;
+        } else if (position == mAllDataCount - 1 && isHaveFootView) {
+            return TYPE_FOOT_VIEW;
+        } else if (mData.size() == 0) {
+            return NetWorkUtils.isNetCanUse(mContext) ? TYPE_NOT_DATA : TYPE_NOT_NET;
         }
         return super.getItemViewType(position);
+
     }
 
 
@@ -167,10 +132,6 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
                 break;
             case TYPE_FOOT_VIEW:
                 viewHolder = new RecyclerView.ViewHolder(mFootView) {
-                };
-                break;
-            case TYPE_NOT_MORE:
-                viewHolder = new RecyclerView.ViewHolder(mNotMoreView) {
                 };
                 break;
             default:
@@ -221,20 +182,16 @@ public abstract class BaseRecyclerAdapter<VH extends RecyclerView.ViewHolder, D 
 
     @Override
     public int getItemCount() {
-        int i = 0;
+        mAllDataCount = mData == null ? 0 : mData.size();
+        if (mData == null || mData.size() == 0) {
+            mAllDataCount = mAllDataCount + 1;
+
+        }
         if (isHaveHeadView) {
-            i++;
+            mAllDataCount += 1;
         }
         if (isHaveFootView) {
-            i++;
-        }
-        if (isHaveNotMoreView) {
-            i++;
-        }
-        if (mData == null || mData.size() == 0) {
-            mAllDataCount = i + 1;
-        } else {
-            mAllDataCount = mData.size() + i;
+            mAllDataCount += 1;
         }
         return mAllDataCount;
     }

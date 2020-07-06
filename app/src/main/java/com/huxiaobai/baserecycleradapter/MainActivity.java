@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private List<String> mData;
     private SmartRefreshLayout mSrlRefresh;
     private int mLimit = 1;
-    private int mLastIndex = 1;
+    private boolean mIsHasMoreView = true;
 
 
     @Override
@@ -52,17 +52,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadData(int limit) {
-        for (int i = mLastIndex; i <= limit * 20; i++) {
+       /* for (int i = 0; i < limit * 20; i++) {
             mData.add("Mark:".concat(String.valueOf(i)));
-            if (i == limit * 20) {
-                mLastIndex = limit * 20 + 1;
-            }
-        }
+        }*/
         if (mDataAdapter == null) {
-            mDataAdapter = new DataAdapter(mData);
+            mDataAdapter = new DataAdapter(this, mData);
             mDataAdapter.addHeadView(LayoutInflater.from(this).inflate(R.layout.item_head_view, null));
             mDataAdapter.addFootView(LayoutInflater.from(this).inflate(R.layout.item_data_view, null));
-            mDataAdapter.addNotMoreView(LayoutInflater.from(this).inflate(R.layout.item_not_more, mRvData,false));
             mRvData.setAdapter(mDataAdapter);
         } else {
             mDataAdapter.notifyData(NetUtils.hasNetInfo(MainActivity.this));
@@ -73,10 +69,16 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_clear).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               //   mData.clear();
-                mDataAdapter.removeHeadView();
-                mDataAdapter.removeFootView();
-                mDataAdapter.removeNotMoreView();
+                //   mData.clear();
+
+                if (mIsHasMoreView) {
+                    mDataAdapter.removeHeadView();
+                    mDataAdapter.removeFootView();
+                } else {
+                    mDataAdapter.addHeadView(LayoutInflater.from(MainActivity.this).inflate(R.layout.item_head_view, null));
+                    mDataAdapter.addFootView(LayoutInflater.from(MainActivity.this).inflate(R.layout.item_data_view, null));
+                }
+                mIsHasMoreView = !mIsHasMoreView;
                 mDataAdapter.notifyData(NetUtils.hasNetInfo(MainActivity.this));
             }
         });
@@ -93,20 +95,17 @@ public class MainActivity extends AppCompatActivity {
             public void onRefresh(RefreshLayout refreshLayout) {
                 refreshLayout.finishRefresh();
                 mData.clear();
-                mLastIndex = mLimit = 1;
                 loadData(mLimit);
             }
         });
         mDataAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onNotNetClick(View view) {
-                mLastIndex = mLimit = 1;
                 loadData(mLimit);
             }
 
             @Override
             public void onNotDataClick(View view) {
-                mLastIndex = mLimit = 1;
                 loadData(mLimit);
             }
 

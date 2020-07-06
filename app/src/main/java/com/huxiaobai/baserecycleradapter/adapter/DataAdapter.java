@@ -1,5 +1,6 @@
 package com.huxiaobai.baserecycleradapter.adapter;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -22,14 +23,14 @@ import java.util.List;
  *
  * @author ：
  */
-public class DataAdapter extends BaseRecyclerAdapter<DataAdapter.ViewHolder, List<String>> {
+public class DataAdapter extends BaseRecyclerAdapter<DataAdapter.ViewHolder, String> {
 
-    public DataAdapter(@NonNull List<String> data) {
-        super(data);
+    public DataAdapter(@NonNull Context context, @NonNull List<String> data) {
+        super(context, data);
     }
 
     @Override
-    protected void onBindViewDataHolder(@NonNull ViewHolder viewHolder,final int i) {
+    protected void onBindViewDataHolder(@NonNull ViewHolder viewHolder, final int i) {
         viewHolder.mTvData.setText(mData.get(i));
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
